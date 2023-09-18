@@ -23,14 +23,14 @@ public class ReportController {
     }
     @GetMapping("/new")
     public String reportForm(){
-        return "new_report";
+        return "/user/reports/new";
     }
 
     @PostMapping
     public String processReport(@Valid Report report, Errors errors, SessionStatus sessionStatus){
 
         if(errors.hasErrors()){
-            return "new_report";
+            return "/user/reports/new";
         }
 
         reportRepo.save(report);

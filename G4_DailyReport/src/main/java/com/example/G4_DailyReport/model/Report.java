@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
@@ -16,16 +17,20 @@ import java.time.LocalDate;
 public class Report extends BaseEntity {
     private LocalDate reportDate;
 
-    @NotBlank(message="Your plan must not be blank.")
+    @NotBlank(message = "Your plan must not be blank.")
     @Column(columnDefinition = "text")
     private String tomorrowPlan;
 
     @Column(columnDefinition = "text")
     private String reasonCannotCompleteWork;
 
-    @NotBlank(message="Your work must not be blank")
+    @NotBlank(message = "Your work must not be blank")
     @Column(columnDefinition = "text")
     private String actualWork;
+
+    @NotBlank(message = "Your working time must not be blank")
+    @Column(columnDefinition = "text")
+    private String workingTime;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

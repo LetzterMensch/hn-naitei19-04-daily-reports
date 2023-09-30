@@ -8,14 +8,16 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import com.example.G4_DailyReport.service.JpaUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
     @Bean
@@ -29,19 +31,38 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    private final JpaUserDetailsService jpaUserDetailsService;
+
     @SuppressWarnings("is deprecated and marked for removal")
+//    @Bean
+//    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http.authorizeHttpRequests().anyRequest().permitAll().and().cors().and().csrf().disable();
+//        return http.build();
+//    }
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests().requestMatchers("/admin/**").hasAuthority("ADMIN")
-                .requestMatchers("/manager/**").hasAuthority("MANAGER")
-                .requestMatchers("/**").hasAnyAuthority("USER","MANAGER","ADMIN")
-                .and().cors().and().csrf()
-                .and().headers().frameOptions().sameOrigin()
+        http.userDetailsService(jpaUserDetailsService);
+        http.authorizeHttpRequests()
+                    .requestMatchers("/resources/**","/managers/**","/css/**","/user/**").permitAll()
+                    .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
+                    .requestMatchers("/**").hasAuthority("ROLE_USER")
                 .and()
-                .formLogin()
-                .successHandler(authenticationSuccessHandler())
+                    .headers()
+                    .frameOptions()
+                    .sameOrigin()
                 .and()
-                .logout();
+                    .formLogin()
+                    .loginPage("/login.html")
+                    .loginProcessingUrl("/login")
+                    .successHandler(authenticationSuccessHandler())
+                    .failureUrl("/login-error.html")
+                    .permitAll()
+                .and()
+                    .logout()
+                    .permitAll()
+                    .logoutSuccessUrl("/")
+                .and().cors().and().csrf().disable();
         return http.build();
     }
 
